@@ -22,6 +22,10 @@ def parse_users(users):
         users_data[username] = (password, salt)
     return users_data
 
+def init(path):
+    global users_login
+    lines = load_file(path)
+    users_login = parse_users(lines)
 
 def save_users(users_data, path):
     file = open(path, 'w')
@@ -54,14 +58,13 @@ def add_user(username, password):
 
 def validate_user(username, password):
     if not username in users_login:
-        print("Username does not exists")
-        return
+        return False
     else:
         p, salt = users_login[username]
         print(p)
         if(hash_pass_with_salt(password, salt) == p):
-            print("Enter")
+            return True
         else:
-            print("OUT")
+            return False
         
 

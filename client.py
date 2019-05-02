@@ -9,14 +9,14 @@ import os
 from stegano import lsb
 from Crypto.PublicKey import RSA
 from Crypto import Random
-
 from Crypto.Hash import SHA256
 
 peers = []
 name = ''
-port = 5695
+port = 4999
 host = '127.0.0.1'
 private_key = ''
+encoding = 'ISO-8859-1'
 
 class peer:
     def __init__(self, name, ip, receiving_port, key):
@@ -29,6 +29,7 @@ class peer:
 
 def parse_peer(s):
     att = s.split('#')
+    print("att", att)
     return peer(att[0], att[1], int(att[2]), att[3])
 
 
@@ -62,6 +63,62 @@ def createKey():
    public_key = key.publickey()
    return key, public_key
 
+def get_login_info(s):
+    global encoding, name
+    command = input('Please type one of the following: Join or Login\n')
+    command = command.lower()
+    while command != 'join' and command != 'login':
+        command = input('I got something else. Please type one of the following: Join or Login\n')
+        command = command.lower()
+
+    if command == 'join':
+        valid_credentials = False
+        username = ''
+        password = ''
+        while not valid_credentials:
+            username = input('Please enter username. This can include alphanumeric characters and _\n')
+            password = input('Please enter your password\n')
+            valid_credentials = True
+            for c in username:
+                if c.isalnum() or c == '_':
+                    pass
+                else:
+                    valid_credentials = False
+                    print("Username is invalid")
+                    continue
+            msg_to_server = "join" + ":" + username + ":" + password
+            s.send(msg_to_server.encode(encoding))
+            data = s.recv(1024)
+            if data.decode(encoding) != 'tamam':
+                valid_credentials = False
+                print("Username taken")
+            
+        name = username
+    elif command == 'login':
+        valid_credentials = False
+        username = ''
+        password = ''
+        while not valid_credentials:
+            username = input('Please enter your username\n')
+            password = input('Please enter your password\n')
+            valid_credentials = True
+            for c in username:
+                if c.isalnum() or c == '_':
+                    pass
+                else:
+                    valid_credentials = False
+                    print("Wrong username")
+                    continue
+            server_msg = "login" + ":" + username + ":" + password
+            s.send(server_msg.encode(encoding))
+            data = s.recv(1024)
+            if data.decode(encoding) != 'tamam':
+                valid_credentials = False
+                print("Invalid username or password")
+        name = username
+    else:
+        print("I am surprised")
+
 
 # functions resposible for handling communication with server
 def connect_to_server():
@@ -76,8 +133,13 @@ def connect_to_server():
     private_key, public_key = createKey()
     puk = public_key.exportKey()
 
+
+    get_login_info(s)
+
     s.send((name+","+str(port)+ "," + puk.decode('ISO-8859-1')).encode('ISO-8859-1'))
     # get peers list 
+
+
     data = s.recv(1024) 
     peer_list_str = data.decode('ISO-8859-1').split(',')
     peer_list = list(map(lambda pp: parse_peer(pp), peer_list_str))
@@ -86,6 +148,8 @@ def connect_to_server():
         # print(pp.name, pp.ip, str(pp.receiving_port), pp.key, pp.connected)
         
     start_new_thread(listen_to_server, (s, ))
+    start_new_thread(create_client, (1,))
+
 
 
 def listen_to_server(s):
@@ -97,7 +161,7 @@ def listen_to_server(s):
         peer_list = list(map(lambda pp: parse_peer(pp), peer_list_str))
         handle_peer_list(peer_list)
         # for pp in peer_list:
-            # print(pp.name, pp.ip, str(pp.receiving_port), pp.key, pp.connected)
+        #     print(pp.name, pp.ip, str(pp.receiving_port), pp.key, pp.connected)
 
 # functions responsible for creating a server for the current peer
 def create_server(x):
@@ -214,7 +278,6 @@ def Main():
 
     connect_to_server()
     start_new_thread(create_server, (1,))
-    start_new_thread(create_client, (1,))
     
     while True:
         pass
@@ -222,30 +285,6 @@ def Main():
  
 if __name__ == '__main__': 
 
-    command = input('Please type one of the following: Join or Login\n')
-    command = command.lower()
-    while command != 'join' and command != 'login':
-        command = input('I got something else. Please type one of the following: Join or Login\n')
-        command = command.lower()
 
-    if command == 'join':
-        valid_credentials = False
-        username = ''
-        password = ''
-        while not valid_credentials:
-            username = input('Please enter username. This can include alphanumeric characters and _\n')
-            password = input('Please enter your password')
-            valid_credentials = True
-            for c in username:
-                if c.isalnum() or c == '_':
-                    pass
-                else:
-                    valid_credentials = False
-
-        name = username
-    elif command == 'login':
-        pass
-    else:
-        print("I am surprised")
 
     Main()
