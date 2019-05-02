@@ -13,7 +13,7 @@ from Crypto.Hash import SHA256
 
 peers = []
 name = ''
-port = 4999
+port = 5000
 host = '127.0.0.1'
 private_key = ''
 encoding = 'ISO-8859-1'
@@ -29,7 +29,7 @@ class peer:
 
 def parse_peer(s):
     att = s.split('#')
-    print("att", att)
+    # print("att", att)
     return peer(att[0], att[1], int(att[2]), att[3])
 
 
@@ -45,14 +45,11 @@ def handle_peer_list(peer_list):
     new_peers = []
 
     for new_peer in peer_list:
-        # print("entered for")
         for i in range(len(peers)):
-            # print("entered for")
             if peers[i].name == new_peer.name:
                 new_peers += [peers[i]]
                 break
         else:
-            # print("entered else")
             new_peers = new_peers + [new_peer]
     peers = new_peers
 
@@ -92,8 +89,9 @@ def get_login_info(s):
             if data.decode(encoding) != 'tamam':
                 valid_credentials = False
                 print("Username taken")
-            
+        
         name = username
+        print("Welcome", name)
     elif command == 'login':
         valid_credentials = False
         username = ''
@@ -116,6 +114,7 @@ def get_login_info(s):
                 valid_credentials = False
                 print("Invalid username or password")
         name = username
+        print("Welcome", name)
     else:
         print("I am surprised")
 
@@ -155,7 +154,9 @@ def connect_to_server():
 def listen_to_server(s):
     while True: 
         data = s.recv(1024)
-        # print(type(data))
+        if not data:
+            s.close()
+            break
         msg = data.decode('ISO-8859-1')
         peer_list_str = msg.split(',')
         peer_list = list(map(lambda pp: parse_peer(pp), peer_list_str))

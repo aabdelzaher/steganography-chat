@@ -55,7 +55,7 @@ def threaded(c, addr):
     print('Connected to :', addr[0], ':', addr[1])
     peerStr = ','.join(map(lambda p: to_string(p), peers))
     # print(','.join(map(lambda p: toString(p), peers))) 
-    print(peerStr)
+    # print(peerStr)
     for p in peers:
         p.socket.send(peerStr.encode('ISO-8859-1'))
     # Start a new thread and return its identifier
@@ -71,7 +71,7 @@ def threaded(c, addr):
             peers = list(filter(lambda p: p.name != name, peers))
             peerStr = ','.join(map(lambda p: to_string(p), peers))
             # print(','.join(map(lambda p: toString(p), peers))) 
-            print(peerStr)
+            # print(peerStr)
             for p in peers:
                 p.socket.send(peerStr.encode('ISO-8859-1'))
         
@@ -99,14 +99,14 @@ def handle_login_info(s):
                 continue
             handle_passwords.add_user(username, password)
             s.send("tamam".encode('ISO-8859-1'))
-            print(username, password)
+            # print(username, password)
             break
         elif data[0] == 'login':
             username = data[1]
             password = data[2]
-            print(username, password)
+            # print(username, password)
             valid = handle_passwords.validate_user(username, password)
-            print(valid)
+            # print(valid)
             if valid:
                 s.send("tamam".encode('ISO-8859-1'))
                 break
