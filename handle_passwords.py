@@ -45,7 +45,6 @@ def hash_pass(password):
 def hash_pass_with_salt(password, salt):
     password = password.encode('ISO-8859-1')
     hashed = hashlib.sha512(password+salt).hexdigest()
-    print(hashed)
     return hashed
 
 def add_user(username, password):
@@ -61,7 +60,6 @@ def validate_user(username, password):
         return False
     else:
         p, salt = users_login[username]
-        print(p)
         if(hash_pass_with_salt(password, salt) == p):
             return True
         else:
