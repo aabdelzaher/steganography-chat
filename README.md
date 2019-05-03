@@ -32,5 +32,7 @@ NOTE: ALL is capital and there is no space between 'ALL' and the colon.
    - change port = xxxx to another port	(Applications cannot run on the same port)
    - run client.py normally in another terminal
 
+Link for demo video for the app:
+https://youtu.be/F1se27DWACA
 
 
